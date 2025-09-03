@@ -9,12 +9,13 @@
   outputs =
     { self, flake-utils, nixpkgs }: flake-utils.lib.eachSystem flake-utils.lib.allSystems (system:
       let
+        imageUrl = "https://releases.ubuntu.com/jammy/ubuntu-22.04.5-live-server-amd64.iso";
         pkgs = nixpkgs.legacyPackages.${system};
         buildVm = pkgs.writers.writeBashBin "build" ''
           set -ex
           
           if [ ! -f install.iso ]; then
-            ${pkgs.wget}/bin/wget -O install.iso https://cdimage.debian.org/debian-cd/13.0.0/amd64/iso-cd/debian-13.0.0-amd64-netinst.iso
+            ${pkgs.wget}/bin/wget -O install.iso ${imageUrl}
           fi
           
           ${pkgs.qemu_kvm}/bin/qemu-img create -f qcow2 ~/vm.img 64G
@@ -40,28 +41,41 @@
         setupVm = pkgs.writers.writeBashBin "setup" ''
           set -e
 
-          export DEBIAN_FRONTEND=noninteractive
-          apt-get update
-          apt-get upgrade -y
-          apt-get install -y --no-install-recommends \
-            build-essential bzip2 ca-certificates curl git gettext libssl-dev locales-all \
-            libxslt1.1 liblcms2-2 libldap2-dev libpq5 libsasl2-2 \
-            libtinfo-dev libncurses5-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev \
-            libncursesw5-dev tk-dev libxmlsec1-dev libffi-dev liblzma-dev adduser lsb-base libxml2-dev \
-            libxslt1-dev libpq-dev libsasl2-dev libopenjp2-7-dev \
-            libtiff5-dev libfreetype6-dev liblcms2-dev libwebp-dev openssh-server nano pipx pre-commit \
-            python3-dev rsync wget
-          pipx install "python-lsp-server[all]"
-          if [ ! -d /nix ]; then
-            curl -L https://nixos.org/nix/install | sh -s -- --daemon --yes
-          fi
+          scp -P 2222 ~/.ssh/id_rsa.pub root@localhost:~/.ssh/authorized_keys
+          scp -P 2222 ~/.ssh/id_rsa.pub therp@localhost:~/.ssh/authorized_keys
+          ssh -A -p 2222 root@localhost <<HEREDOC
+            export DEBIAN_FRONTEND=noninteractive
+            apt-get update
+            apt-get upgrade -y
+            apt-get install -y --no-install-recommends \
+              build-essential bzip2 ca-certificates curl git gettext libssl-dev locales-all \
+              libxslt1.1 liblcms2-2 libldap2-dev libpq5 libsasl2-2 \
+              libtinfo-dev libncurses5-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev \
+              libncursesw5-dev tk-dev libxmlsec1-dev libffi-dev liblzma-dev adduser lsb-base libxml2-dev \
+              libxslt1-dev libpq-dev libsasl2-dev libopenjp2-7-dev \
+              libtiff5-dev libfreetype6-dev liblcms2-dev libwebp-dev openssh-server nano pipx pre-commit \
+              python3-dev rsync wget
+            pipx install "python-lsp-server[all]"
+            if [ ! -d /nix ]; then
+              curl -L https://nixos.org/nix/install | sh -s -- --daemon --yes
+            fi
 
-          git config --global user.name "Danny de Jong"
-          git config --global user.email "ddejong@therp.nl"
+            echo "alias vi=nvim" >> /home/therp/.profile
+            echo "alias g=git" >> /home/therp/.profile
+            mkdir -p /home/therp/.config/nvim
+            echo "luafile /etc/xdg/nvim/init.lua" > /home/therp/.config/nvim/init.vim
 
-          echo "alias vi=nvim" >> /home/therp/.profile
-          mkdir -p /home/therp/.config/nvim
-          echo "luafile /etc/xdg/nvim/init.lua" > /home/therp/.config/nvim/init.vim
+            mkdir -p /root/.ssh
+            mkdir -p /home/therp/.ssh
+            chown therp:therp /home/therp/.ssh
+          HEREDOC
+          ssh -p 2222 root@localhost <<HEREDOC
+            nix-env -iA nixpkgs.neovim
+          HEREDOC
+          ssh -p 2222 therp@localhost <<HEREDOC
+            git config --global user.name "Danny de Jong"
+            git config --global user.email "ddejong@therp.nl"
+          HEREDOC
         '';
 
         shellVm = pkgs.writers.writeBashBin "shell" ''
