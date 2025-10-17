@@ -93,7 +93,7 @@
           rsync -IL -e "ssh -p 2222" /etc/gitconfig root@localhost:/etc/gitconfig
           rsync -IL -e "ssh -p 2222" ~/.config/pylintrc therp@localhost:~/.config/pylintrc
           rsync -IL -e "ssh -p 2222" ~/.pydocstyle.ini therp@localhost:~/.pydocstyle.ini
-          rsync -IL -e "ssh -p 2222" ~/code/odools.toml therp@localhost:~/odools.toml
+          rsync -IL -e "ssh -p 2222" ~/odools.toml therp@localhost:~/odools.toml
           rsync -ILr --del -e "ssh -p 2222" /etc/xdg/nvim root@localhost:/etc/xdg
           rsync -ILr --del -e "ssh -p 2222" ~/.config/nvim therp@localhost:~/.config
           ssh -A -p 2222 therp@localhost
