@@ -18,7 +18,7 @@
             ${pkgs.wget}/bin/wget -O install.iso ${imageUrl}
           fi
           
-          ${pkgs.qemu_kvm}/bin/qemu-img create -f qcow2 ~/vm.img 64G
+          ${pkgs.qemu_kvm}/bin/qemu-img create -f qcow2 ~/vm.img 128G
           ${pkgs.qemu_kvm}/bin/qemu-system-x86_64 -enable-kvm -boot d \
             -cdrom install.iso -m 4G -cpu host -smp 2 -hda ~/vm.img
         '';
