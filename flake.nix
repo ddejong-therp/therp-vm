@@ -77,7 +77,8 @@
 
             mkdir -p /root/.ssh
             mkdir -p /home/therp/.ssh
-            chown therp:therp /home/therp/.ssh
+            chown -R therp:therp /home/therp/.ssh
+            chown -R therp:therp /home/therp/.config
           HEREDOC
           ssh -p 2222 root@localhost <<HEREDOC
             nix-env -iA nixpkgs.neovim nixpkgs.rustup
