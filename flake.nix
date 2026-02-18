@@ -49,13 +49,14 @@
             apt-get update
             apt-get upgrade -y
             apt-get install -y --no-install-recommends \
-              build-essential bzip2 ca-certificates curl git gettext libssl-dev locales-all \
-              libxslt1.1 liblcms2-2 libldap2-dev libpq5 libsasl2-2 \
+              apt-file build-essential bzip2 ca-certificates curl git gettext libssl-dev locales-all \
+              libxslt1.1 liblcms2-2 libldap2-dev libpoppler-cpp-dev libpq5 libsasl2-2 \
               libtinfo-dev libncurses5-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev \
               libncursesw5-dev tk-dev libxmlsec1-dev libffi-dev liblzma-dev adduser lsb-base libxml2-dev \
               libxslt1-dev libpq-dev libsasl2-dev libopenjp2-7-dev \
               libtiff5-dev libfreetype6-dev liblcms2-dev libwebp-dev openssh-server nano \
               postgresql pre-commit python3-dev ripgrep rsync wget
+            apt-file update
             pip install "python-lsp-server[all]"
             pip install pylint-odoo
             if [ ! -d /nix ]; then
