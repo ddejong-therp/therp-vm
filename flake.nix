@@ -61,7 +61,9 @@
             pip install pylint-odoo
             if [ ! -d /nix ]; then
               curl -L https://nixos.org/nix/install | sh -s -- --daemon --yes
+              nix-channel --add https://nixos.org/channels/nixos-25.11 pkgs
             fi
+            curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
             sudo -u postgres psql -c "CREATE ROLE therp WITH LOGIN SUPERUSER"
             sudo -u therp createdb therp
@@ -79,9 +81,10 @@
             mkdir -p /home/therp/.ssh
             chown -R therp:therp /home/therp/.ssh
             chown -R therp:therp /home/therp/.config
+            echo "export COLORTERM=24bit" >> /home/therp/.bashrc
           HEREDOC
           ssh -p 2222 root@localhost <<HEREDOC
-            nix-env -iA nixpkgs.neovim nixpkgs.rustup
+            nix-env -iA pkgs.neovim pkgs.bash-language-server pkgs.vscode-langservers-extracted
           HEREDOC
           ssh -p 2222 therp@localhost <<HEREDOC
             git config --global user.name "Danny de Jong"
